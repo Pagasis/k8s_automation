@@ -1,0 +1,38 @@
+name: CI with Minikube
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  minikube-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Start Minikube
+        id: minikube
+        uses: medyagh/setup-minikube@latest
+
+      - name: Check cluster
+        run: kubectl get nodes && kubectl get pods -A
+
+      - name: Build Docker image inside Minikube
+        run: |
+          eval $(minikube -p minikube docker-env)
+          docker build -t python-hello:latest .
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+          kubectl rollout status deployment/python-hello-deploy
+
+      - name: Test service URL
+        run: |
+          URL=$(minikube service python-hello-svc --url)
+          echo "Service URL: $URL"
+          curl -s $URL

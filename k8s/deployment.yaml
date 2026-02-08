@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-hello-deploy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: python-hello
+  template:
+    metadata:
+      labels:
+        app: python-hello
+    spec:
+      containers:
+        - name: python-hello
+          image: python-hello:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
