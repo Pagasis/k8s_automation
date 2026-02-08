@@ -25,6 +25,12 @@ jobs:
           eval $(minikube -p minikube docker-env)
           docker build -t python-hello:latest .
 
+      - name: Debug pods and services
+        run: |
+          kubectl get pods -o wide
+          kubectl get svc
+          kubectl logs -l app=python-hello --tail=100
+
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f k8s/deployment.yaml
